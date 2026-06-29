@@ -1,0 +1,39 @@
+--[[
+
+manifest.lrweb
+
+Lightroom Web Gallery manifest.  This file maps various template files to actual
+files to be produced for your website.
+
+--
+
+The Fullpage Lightroom Web Gallery
+
+Copyright (c) 2016-2026 Justin Briggs
+
+Licensed under the MIT License:
+   http://www.opensource.org/licenses/mit-license.php
+
+]]
+
+importTags( "lr", "com.adobe.lightroom.default" ) -- main lightroom tags including Pagination.
+
+-- create a web page for all images based upon body.html (written to index.html), with all images
+AddGridPages {
+	template="body.html",
+	rows=model.nonCSS.numRows,
+	columns=model.nonCSS.numCols,
+}
+-- include images and javascript resources
+AddResources {
+	source='res',
+	destination='res',
+}
+IdentityPlate {
+	destination='im/logo.png',
+	enabledBinding = [[appearance.logo.display]],
+}
+AddPage({
+	template = "fullpage.css",
+	filename = "res/css/fullpage.css"
+})

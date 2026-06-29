@@ -1,0 +1,8 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*~
+.vscode/
+
+# Built release artifacts (attach to a GitHub Release instead of committing)
+*.zip

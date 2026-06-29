@@ -1,0 +1,424 @@
+<% --[[
+The Fullpage Lightroom Web Gallery
+
+Copyright (c) 2016-2026 Justin Briggs
+
+Licensed under the MIT License:
+   http://www.opensource.org/licenses/mit-license.php
+ ]]
+%>
+
+<!-- Custom gallery / page control code -->
+<script type="text/javascript">
+"use strict";
+
+/* jQuery Unveil  http://luis-almeida.github.io/unveil/  MIT license  Copyright 2013 Luís Almeida */
+/* with modifications at github.com/jtbr/unveil */
+!function(t){t.fn.unveil=function(i,e){function n(){r&&window.clearTimeout(r),r=window.setTimeout(function(){if(0!=a.length){var i=u.scrollTop(),e=i+u.height(),n=a.filter(function(){var n=t(this);if(!n.is(":hidden")){var o=n.offset().top,r=o+n.height();return r>=i-s&&e+s>=o}});o=n.trigger("unveil"),a=a.not(o)}},50)}var o,r,u=t(window),s=i||0,l=window.devicePixelRatio>1,c=l?"data-src2x":"data-src",a=this;return this.one("unveil",function(){var t=this.getAttribute(c);t=t||this.getAttribute("data-src"),t&&(this.setAttribute("src",t),"function"==typeof e&&e.call(this))}),u.on("scroll.unveil resize.unveil lookup.unveil",n),n(),this}}(window.jQuery);!function(t){t.fn.unveil=function(i,e){function n(){r&&window.clearTimeout(r),r=window.setTimeout(function(){if(0!=a.length){var i=u.scrollTop(),e=i+u.height(),n=a.filter(function(){var n=t(this);if(!n.is(":hidden")){var o=n.offset().top,r=o+n.height();return r>=i-s&&e+s>=o}});o=n.trigger("unveil"),a=a.not(o)}},50)}var o,r,u=t(window),s=i||0,l=window.devicePixelRatio>1,c=l?"data-src2x":"data-src",a=this;return this.one("unveil",function(){var t=this.getAttribute(c);t=t||this.getAttribute("data-src"),t&&(this.setAttribute("src",t),"function"==typeof e&&e.call(this))}),u.on("scroll.unveil resize.unveil lookup.unveil",n),n(),this}}(window.jQuery);
+
+$(document).ready(function () {
+	$("body").removeClass("preload"); // enable transitions now that we've loaded.
+
+	var jsondata = JSON.parse($("#imagelist").html()),
+		images = jsondata["hasPart"];
+<% if mode == 'preview' then %>
+	if (images.length > 12) images.length = 12; // truncate at 12 elements
+<% end %>
+
+	/** Add gallery markup to page from images array **/
+	var thumbCtnr = $('.thumbcontainer ul.thumbs'),
+		tabIndexOffset = 10, // first tabindex for thumbnails
+		loadedImgs = 10; // number of thumbs to pre-load
+	$$.each(images, function(idx, image){
+		var mdDims = image.contentSize.split(',')[0].split('x'),
+		    width = parseInt(mdDims[0],10),
+		    height = parseInt(mdDims[1],10),
+			portraitClass = (height > width) ? 'portrait' : '',
+			tabIndex = tabIndexOffset + parseInt(idx), // could set all equal?
+			imgFn = (image.contentUrl).substr(6),
+			srcStr = (idx < loadedImgs ? 'src' : <%= mode == 'preview' and "'src'" or "'data-src'" %>) + '="im/th/' + imgFn + '"',
+			src2xStr = (idx < loadedImgs ? 'srcset' : 'data-src2x') + '="im/th2x/' + imgFn + (idx < loadedImgs ? ' 2x" style="opacity:1"' : '"');
+		var imgstr = '\
+<li>\
+<div class="thumbwrapper" tabindex=' + tabIndex + '>\
+	<div class="center-cropped">\
+		<img class="' + portraitClass + '" ' + srcStr + ' ' + src2xStr + ' title="' + image.name + <% if model.nonCSS.showImageTooltips then %>'" alt="' + image.name <% end %>  + '" />\
+	</div>\
+</div>\
+</li>';
+
+		thumbCtnr.append(imgstr);
+		image.el = thumbCtnr.children().last();
+	});
+
+<% if numImages > 10 then  --[[more than one row]] %>
+	// This sets the width of the thumbs container, for a minor purpose: to avoid the centering being off up to 1 thumbnail-width _while keeping the last line of thumbs left aligned_ (rather than centered)
+	var resizeTimer;
+	function setThumbsWidth()
+	{
+		var windowWidth = $('.thumbcontainer .inner').width();
+		var blockWidth = $('.thumbcontainer ul li').outerWidth(true) /*+ 5 /*no idea from where*/;
+		var maxBoxesPerRow = Math.floor(windowWidth / blockWidth);
+		thumbCtnr.width(maxBoxesPerRow * blockWidth);
+	}
+	setThumbsWidth(); // run once
+	$(window).resize(function() { // and again after (debounced) resize
+		if (resizeTimer) clearTimeout(resizeTimer);
+		resizeTimer = setTimeout(setThumbsWidth, 150);
+	});
+<% end %>
+
+<% if mode ~= 'preview' then %>
+	$('.thumbcontainer img').unveil( 200 /* px ahead to load images */,
+			function() {
+				$(this).on("load", function() { this.style.opacity = 1; });
+			});
+
+	/* handle floating control/menu bar */
+	var startingOffset = $('.controlbar').offset().top,
+		controlBarFixed = false;
+	if (!positionStickySupport) {
+		$(window).scroll( function() {
+			if (!controlBarFixed && $(window).scrollTop() > startingOffset) {
+				$('.controlbar').css({'position': 'fixed', 'top': 0});
+				$('body').css('padding-top', $('.controlbar').height());
+				controlBarFixed = true;
+			} else if (controlBarFixed && $(window).scrollTop() < startingOffset) {
+				$('.controlbar').css('position', 'relative');
+				$('body').css('padding-top', 0);
+				controlBarFixed = false;
+			}
+		});
+	}
+<% end %>
+
+	/* scroll to internal hrefs */
+	$('a.inPage').on('click', function(e) {
+		// stops hrefs making the page jump when clicked
+		e.preventDefault ? e.preventDefault() : e.returnValue = false;
+
+		// get the hash of the button you just clicked
+		var hash = $(this).attr('href').split('#')[1];
+		var goTo =  $('#'+ hash).offset().top;
+		if (!positionStickySupport && controlBarFixed)
+			goTo -= $('.controlbar').height();
+
+		// Scroll the page to the desired position!
+		$("html, body").stop().animate({ scrollTop: goTo }, 500/*ms*/);
+	});
+	
+	// function to be called to keep thumbnails on screen (when going to next/prev photo)
+	$$.fn.keepOnScreen = function(){
+		var bounds = this.get(0).getBoundingClientRect(),
+		    height = this.height();
+		if (bounds.top + height >= window.innerHeight) {
+			$('html, body').animate({ scrollTop: $('body').scrollTop() + this.outerHeight(true) }, 500/*ms*/);
+		} else if (bounds.bottom - height <= 0) {
+			$('html, body').animate({ scrollTop: $('body').scrollTop() - this.outerHeight(true) }, 500/*ms*/);
+		}
+	}
+
+	// photoswipe:
+	var lightBox = null;
+	// slideshow vars:
+	var ssRunning = false,
+		ssOnce = false,
+		ssDelay = <%= model.nonCSS.slideshowDelay %> /*ms*/,
+		ssButtonClass = '.pswp__button--playpause';
+	// responsive photoswipe image size vars:
+	var viewportWidthRealPx, /* after accounting for pixel density */
+		threshBigSm = <%= math.floor(0.65 * model.photoSizes.large.width) %>, /* real px, after accounting for pixel density */
+		firstResize = true;
+	// browser environment variables
+	var runningLocally = window.location.protocol=='file:', // whether we're running locally (file://)
+		iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream; // whether we're running on iOS
+
+	/* enable keyboard actuation of thumbnails */
+	thumbCtnr.on('keypress', 'li', function(event) {
+		var code = event.which;
+		if ((code === 13 /*return*/) || (code === 32 /*space*/)) {
+			$(this).click();
+		}
+	});
+
+	/* launch photoswipe when clicking on thumbnail */
+	thumbCtnr.on('click', 'li', function(event) {
+		/* Possible mousewheel zoom support option:
+		   https://github.com/vbarinov/PhotoSwipe/commit/74ecf78522d290139aff196d1776e20e3848516f
+		   for now opting for default behavior (mousewheel to quit) */
+		event.preventDefault ? event.preventDefault() : event.returnValue = false;
+
+		<%= (mode=='preview') and '$("html, body").scrollTop(0);' or '' --[[ Avoid photoswipe display bug in LR]] %>
+
+		var $$index = $(this).children().first().attr('tabindex')-tabIndexOffset,
+			encUrl = encodeURIComponent('$canonicalUrl');
+		var options = {
+			history: false,
+			escKey: false, /* handled below */
+			preload: [2,4],
+			index: $$index,
+			bgOpacity: 0.85,
+			allowPanToNext: false, /* on touchscreen need to zoom out before panning to next/last */
+			showHideOpacity: true,
+			<%= (mode=='preview') and 'mouseUsed: true, allowDrag: false,' or '' --[[ Avoid photoswipe display bug in LR]] %>
+			isClickableElement: function(el) {
+				return el.tagName === 'A' || $(el).hasClass("pswp__button--playpause");
+			},
+			getThumbBoundsFn: function(index) {
+				// See Options->getThumbBoundsFn section of docs for more info
+				var $$thumbnail = $(images[index].el)[0],
+					pageYScroll = window.pageYOffset || document.documentElement.scrollTop,
+					rect = $$thumbnail.getBoundingClientRect();
+				return {x:rect.left, y:rect.top + pageYScroll, w:rect.width};
+			},
+			addCaptionHTMLFn: function(item, captionEl, isFake) {
+				if (!item.name && !item.description) {
+					captionEl.children[0].innerHTML = '';
+					return false;
+				}
+				captionEl.children[0].innerHTML = item.name + '<br/><small>' + item.description + '</small>';
+				return true;
+			},
+			shareButtons: [
+				{id:'map', label:'Show on a map', url:'http://maps.google.com/maps?f=q&t=h&q={{custom}}'},
+				{id:'download', label:'Download image', url:'{{raw_image_url}}', download:true},
+				{id:'facebook', label:'Share on Facebook', url:'https://www.facebook.com/sharer/sharer.php?u='+encUrl},
+				{id:'googleplus', label:'Share on Google Plus', url:'https://plus.google.com/share?url='+encUrl},
+				{id:'twitter', label:'Tweet', url:'https://twitter.com/intent/tweet?text=Check%20out%20this%20image%20gallery&url='+encUrl},
+				{id:'pinterest', label:'Pin it', url:'http://www.pinterest.com/pin/create/button/?url='+encUrl+'&media='+encodeURIComponent('<%= addSlash(model.metadata.canonicalUrlBase) %>')+'{{image_url}}&title='+encodeURIComponent("$model.metadata.siteTitle.value")},
+				{id:'email', label:'Send via E-mail', url:"mailto:?subject=Great%20image%20gallery&amp;body=Check%20out%20this%20image%20gallery:%20"+encUrl, noPopup:true}
+			],
+			getCustomInfoForShare: function( shareButton ) {
+				// use {{custom}} field for use of GPS/location query string (already URI encoded)
+				return lightBox.currItem.contentLocation ? lightBox.currItem.contentLocation.geo || encodeURIComponent(lightBox.currItem.contentLocation.name) : '';
+			},
+			parseShareButtonOut: function(shareButton, shareButtonMarkup) {
+				if (shareButton.id=='map' && (!lightBox.currItem.contentLocation || !(lightBox.currItem.contentLocation.name || lightBox.currItem.contentLocation.geo)))
+					return ''; // Disable map if image has no known location (note this will show even if only country or sublocation is provided)
+				else
+					return shareButtonMarkup;
+			}
+		}
+<% if model.nonCSS.showDownloadAll then %>
+		if (!iOS <% if mode ~= "preview" then %>&& !runningLocally<% end %>) {
+			// Enable FileSaver when not on iOS or running locally (where it won't work under chrome or IE) - not very useful in those cases anyway
+			options.shareButtons.splice(2/*index*/, 0, {id:'downloadall', label: 'Download all images', url:'javascript:;', noPopup:true});
+		}
+<% end %>
+
+		lightBox = new PhotoSwipe($('.pswp')[0], PhotoSwipeUI_Default, images, options);
+
+		lightBox.listen('beforeResize', function() {
+			// fires each time size of gallery viewport updates
+			// calculate real pixels (photoswipe viewport * devicePixelRatio)
+			var newVpWidth = lightBox.viewportSize.x * window.devicePixelRatio;
+
+			if ( !firstResize &&
+				(   newVpWidth > threshBigSm && viewportWidthRealPx <= threshBigSm
+				 || newVpWidth <= threshBigSm && viewportWidthRealPx > threshBigSm ) ) {
+				// sets a flag on slides that are in DOM, which will force update of content
+				lightBox.invalidateCurrItems();
+			}
+			viewportWidthRealPx = newVpWidth;
+
+			if (firstResize) {
+				firstResize = false;
+			}
+		});
+
+		setSlideshowState(ssButtonClass, false /* not running from the start */);
+
+		// start timer for next slide in slideshow after prior image has loaded, and keep thumbnails visible
+		lightBox.listen('afterChange', function() {
+			if (ssRunning && ssOnce) {
+				ssOnce = false;
+				setTimeout(gotoNextSlide, ssDelay);
+			}
+			$(lightBox.currItem.el).keepOnScreen();
+		});
+
+		// gettingData event fires each time PhotoSwipe retrieves image source & size (set before init)
+		lightBox.listen('gettingData', function(index, item) {
+			// Set image source & size based on real viewport width
+			var imType = "lg";
+			if (viewportWidthRealPx <= threshBigSm) {
+				imType = "md";
+			}
+
+			item.src = (item.contentUrl).replace("md/",imType+"/");
+			var dims = item.contentSize.split(',')[imType=="md"?0:1].split('x');
+			item.w = parseInt(dims[0],10);
+			item.h = parseInt(dims[1],10);
+		});
+		// mouse was used (triggers only once)
+		lightBox.listen('mouseUsed', function() {
+			$('.pswp__container').addClass('transit'); // enable css slide transitions on non-touch devices
+		});
+		// share link was clicked
+		lightBox.listen('shareLinkClick', function(e, target) {
+			if (target.className === "pswp__share--downloadall") {
+				// if in fullscreen mode, exit (or modal won't be visible)
+				if (lightBox.ui.supportsFullscreen()) {
+					var fsAPI = lightBox.ui.getFullscreenAPI();
+					if (fsAPI.isFullscreen())
+						fsAPI.exit();
+				}
+				openDownloadAll();
+			}
+		});
+		lightBox.listen('destroy', function() { lightBox = null; });
+
+		lightBox.init();
+	});
+
+	/* slideshow management */
+	function setSlideshowState(el, running) {
+		if (running) {
+			setTimeout(gotoNextSlide, ssDelay / 2.0 /* first time wait less */);
+		}
+		var title = running ? "Pause Slideshow" : "Play Slideshow";
+		$(el).removeClass(running ? "play" : "pause") // change icons defined in css
+			.addClass(running ? "pause" : "play")
+			.prop('title', title);
+		ssRunning = running;
+	}
+	$(ssButtonClass).on('click', function(e) {
+		// toggle slideshow on/off
+		setSlideshowState(this, !ssRunning);
+	});
+	function gotoNextSlide() {
+		if (ssRunning && !!lightBox) {
+			ssOnce = true;
+			lightBox.next();
+			// start counter for next slide in 'afterChange' listener
+		}
+	}
+
+	/* override handling of Esc key to stop slideshow on first esc (note Esc to leave fullscreen never gets here) */
+	$(document).keydown(function(e) {
+		if (e.altKey || e.ctrlKey || e.shiftKey || e.metaKey) return;
+		if ((e.key === "Escape" || e.which == 27 /*esc*/) && !!lightBox) {
+			e.preventDefault ? e.preventDefault() : e.returnValue = false;
+
+<% if model.nonCSS.showDownloadAll then %>
+			if($("#popupOverlay").css('opacity') == 1) {
+				closePopup();
+			} else
+<% end %>
+			if (ssRunning) {
+				setSlideshowState(ssButtonClass, false);
+			} else {
+				lightBox.close();
+			}
+		}
+	});
+
+<% if model.nonCSS.showDownloadAll then %>
+	var Downloading = false; // true if download all operation underway
+	function closePopup() {
+		$("#popupOverlay").css({visibility: "hidden", opacity: 0, "z-index": -999});
+		return false;
+	}
+	$("#popupOverlay").on('click', function(e) { if ($(e.target).is('#popupOverlay') || $(e.target).is('.close *')) return closePopup() });
+
+	function openDownloadAll() {
+		$("#popupOverlay h3").text("$model.nonCSS.text.DownloadDesc");
+		if (!Downloading) {
+			$("#popupOverlay .popupContent").html('\
+			<form action="#" id="download_form">\
+				<ul>\
+					<li><label><input type="radio" name="size" value="th2x" /><%= LOC "$$$/AgWPG/Templates/HTML/Panel/Labels/MaximumImageSizeLabel/Thumb2x=Small Size" %>: $model.photoSizes.thumb2x.width<%=LOC( "$$$/AgWPG/Templates/HTML/Panel/Labels/ImageSizeUnit=px") %></label></li>\
+					<li><label><input type="radio" name="size" value="md" checked /><%= LOC "$$$/AgWPG/Templates/HTML/Panel/Labels/MaximumImageSizeLabel/LargePreview=Medium Size" %>: $model.photoSizes.medium.width<%=LOC( "$$$/AgWPG/Templates/HTML/Panel/Labels/ImageSizeUnit=px") %></label></li>\
+					<li><label><input type="radio" name="size" value="lg" /><%= LOC "$$$/AgWPG/Templates/HTML/Panel/Labels/MaximumImageSizeLabel/FullPreviewSm=Full Size" %>: $model.nonCSS.largeImageWidth<%=LOC("$$$/AgWPG/Templates/HTML/Panel/Labels/ImageSizeUnit=px") %></label></li>\
+				</ul>\
+				<button type="submit" class="button"><%= LOC "$$$/AgWPG/Templates/HTML/DefaultText/DownloadButton=Download" %></button>\
+			</form>');
+		}
+		$("#popupOverlay").css({visibility: "visible", opacity: 1, "z-index": "9999"});
+		return false;
+	}
+
+	/* Handle download all button invocation; jszip loading is deferred until here */
+	$("#popupOverlay .popupContent").on("submit", "#download_form", function (e) {
+		e.preventDefault ? e.preventDefault() : e.returnValue = false;
+		var sizeSelected = $(this).find("input[name='size']:checked").val();
+
+		$("#popupOverlay .popupContent").html('\
+			<div class="progress" id="progress_bar">\
+				<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>\
+			</div>\
+			<p class="alert" id="result"></p>');
+
+		// show an alert message with a given type ('alert-success, alert-danger, ""')
+		function showMessage(text, alerttype) {
+			$("#result").removeClass().addClass("alert " + alerttype).html(text);
+		}
+		// update the progress bar. with given percent (integer)
+		function updatePercent(percent) {
+			$("#progress_bar .progress-bar").attr("aria-valuenow", percent).css({width : percent + "%"}).text(percent+"%");
+		}
+		showMessage("<%= LOC "$$$/AgWPG/Templates/HTML/DefaultText/DownloadStarting=Download starting... (This may take a while)" %>","");
+
+		$$.getScript('$theRoot/js/jszip-all.min.js', function() {
+			try {
+				var isFileSaverSupported = !!new Blob;
+			} catch (e) {}
+			if (!isFileSaverSupported) { /* can't check this until Blob polyfill loads above */
+				showMessage("<%= LOC "$$$/AgWPG/Templates/HTML/DefaultText/DownloadUnsupportedBlob=Unsupported browser. Try upgrading." %>", "alert-danger");
+				return false;
+			}
+
+			Downloading = true;
+			$('#popupOverlay').css('cursor','wait');
+			var zip = new JSZip();
+			var Promise = window.Promise;
+			if (!Promise) {
+				Promise = JSZip.external.Promise;
+			}
+			// add file to the zip-to-be
+			function addzipfile(zip, path) {
+				var filename = path.replace(/.*\//g, ""); // strip path
+				zip.file(filename, urlToPromise(path), {binary:true});
+			}
+			// Fetch the content and return the associated promise that will contain the data.
+			function urlToPromise(url) {
+				return new Promise(function(resolve, reject) {
+					JSZipUtils.getBinaryContent(url, function (err, data) {
+						if (err)  reject(err);
+						else  resolve(data);
+					});
+				});
+			}
+
+			$$.each(images, function(idx, imageRec){
+				var imageFn = (imageRec.contentUrl).substr(6);
+				addzipfile(zip, 'im/' + sizeSelected + '/' + imageFn);
+			});
+
+			// asynchronously download all the images into a blob
+			zip.generateAsync({type:"blob", streamFiles: true, compression: "STORE"}, function updateCallback(metadata) {
+				var msg = "";
+				if (metadata.currentFile) {
+					msg += "<%= LOC "$$$/AgWPG/Templates/HTML/DefaultText/DownloadCurrent=downloading:" %> " + metadata.currentFile;
+				}
+				showMessage(msg, '');
+				updatePercent(metadata.percent|0);
+			})
+			.then(function callback(blob) {
+				// when all files have been downloaded, we can trigger the saving of the .zip
+				showMessage("<%= LOC "$$$/AgWPG/Templates/HTML/DefaultText/DownloadSaving=Done! &nbsp;Will now save to disk." %>", "alert-success");
+				Downloading = false;
+				$('#popupOverlay').css('cursor','default');
+				saveAs(blob, "gallery.zip");
+			}, function (e) {
+				showMessage(e, "alert-danger");
+				$('#popupOverlay').css('cursor','default');
+				Downloading = false;
+			});
+		});
+		return false;
+	});
+<% end %>
+
+});
+</script>

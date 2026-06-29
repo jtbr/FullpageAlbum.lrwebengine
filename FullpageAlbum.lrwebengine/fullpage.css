@@ -1,0 +1,710 @@
+<%
+--[[
+The Fullpage Lightroom Web Gallery
+
+Copyright (c) 2016-2026 Justin Briggs
+
+Licensed under the MIT License:
+   http://www.opensource.org/licenses/mit-license.php
+]]
+%>
+<%
+local menuItems=0;
+if model.metadata.menu1.value ~= '' then menuItems=menuItems+1 end
+if model.metadata.menu2.value ~= '' then menuItems=menuItems+1 end
+if model.metadata.menu3.value ~= '' then menuItems=menuItems+1 end
+if menuItems < 1 then menuItems = 1 end
+%>
+/* Custom default styling */
+*, *:before, *:after {
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+p {
+	margin: 0 0 2em 0;
+}
+h1, h2, h3, h4, h5, h6 {
+	/*color: #616161;*/
+	font-weight: 700;
+	letter-spacing: 0.11em; /* -1px? */
+	line-height: 1em;
+	margin: 0 0 1em 0;
+	text-transform: <%= model.appearance.uppercaseHeaders and 'uppercase /* force uppercase */' or 'none'%>;
+	display: table; /* so they don't span the whole container, affecting hovers */
+	font-family: <%=  model.appearance.h1to6["font-family"] %>;
+}
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+	color: inherit;
+	text-decoration: none;
+}
+h2 { /* this is the biggest header, h1 is text-sized */
+	font-size: 1.75em;
+	line-height: 1.5em;
+}
+h3 {
+	font-size: 1.35em;
+	line-height: 1.5em;
+}
+h4 {
+	font-size: 1.1em;
+	line-height: 1.5em;
+}
+h5 {
+	font-size: 0.9em;
+	line-height: 1.5em;
+}
+h6 {
+	font-size: 0.7em;
+	line-height: 1.5em;
+}
+strong, b {
+	/*color: #616161;*/
+	font-weight: 700;
+}
+em, i {
+	font-style: italic;
+}
+sub {
+	font-size: 0.8em;
+	position: relative;
+	top: 0.5em;
+}
+sup {
+	font-size: 0.8em;
+	position: relative;
+	top: -0.5em;
+}
+.align-left {
+	text-align: left;
+}
+.align-center {
+	text-align: center;
+	display: block;
+}
+.align-right {
+	text-align: right;
+	display: block;
+}
+.float-right {
+	float: right;
+	clear: right;
+}
+.float-left {
+	float: left;
+	clear: left;
+}
+
+/* customization */
+body {
+	font-family: <%=  model.appearance.body["font-family"] %>;
+	font-size: 18px;
+	font-weight: 300;
+	line-height: 1;
+	-webkit-text-size-adjust: none;
+	color: #e5e5e5;
+	background:  <%= model.nonCSS.body["background-color"] %>;
+	min-width: 320px;
+	z-index: 1;
+}
+
+/* disable transitions while page is loading (necessary? TBD.) */
+.preload * {
+	-webkit-transition: none !important;
+	-moz-transition: none !important;
+	-ms-transition: none !important;
+	-o-transition: none !important;
+}
+.unselectable { /* disallow text selection */
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none; /* IE 10+ (<10 needs unselectable attribute in tag */
+	user-select: none;
+}
+
+.clear {
+	clear: both;
+}
+.wrap {
+	width: 100%;
+	max-width: 1400px; /* see also .controlbar */
+	min-width: 300px;
+	z-index: 10;
+	position: relative;
+	margin: 0 auto;
+	padding: 0;
+	cursor: default;
+}
+
+.section {
+	width: 100%;
+	position: relative;
+	margin: 0 auto;
+	color: <%= model.nonCSS.sectionColor.color %>;
+	z-index: 2; /* above pseudoBG img used in LR */
+}
+.section a {
+	color: inherit;
+	text-decoration: underline;
+}
+.section a:hover, .section a:focus, .section a:active {
+	text-decoration: none;
+	outline: default;
+}
+
+.inner {
+	max-width: 934px; /* 10*91 + 2*12 */
+	min-width: 300px;
+	margin: 0 auto;
+	position: relative;
+	min-height: 50px;
+	padding:30px 12px;
+	width:100%; /* for aligned titles in LR */
+}
+.inner:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+/** SECTIONS **/
+/* top with picture and overlaid text */
+.banner {
+	min-height: 150px;
+	background:#fff;
+	background-repeat: no-repeat;
+	background-position: center top;
+	background-size: cover;
+	padding: 20px 0;
+	/*background-attachment: fixed;  causes cover to fail; could use JS: http://stackoverflow.com/a/26996468 but, no */
+	width: 100%;
+	height: <%= math.floor(model.appearance.bannerHeightPx) .. "px;" %>
+	color: <%= model.nonCSS.titleColor.color %>;
+}
+
+/* TBD: use modernizr? what if landscape? */
+@media (max-width: 768px) { /* for iOS Safari to support background-size:cover correctly */
+	.banner {
+		background-attachment:scroll;
+	}
+}
+
+.banner h2,
+.banner h3,
+.banner p {
+	text-shadow: 0px 0px 0.5px rgba(0,0,0,0.3), 1px 1px 2px #fff, 0px 0px 1em #ddd; /* could drop middle one */
+	z-index: 2; /* above pseudoBG img used in LR */
+}
+<% if model.nonCSS.bannerBorderCSS ~= '' then %>
+.banner .inner {
+	border: <%= model.nonCSS.bannerBorderCSS %>;
+	border-radius: 15px;	
+}
+<% end %>
+.logo {
+	/* top/bottom margin added inline depending upon position */
+	z-index: 2; /* above pseudoBG img used in LR */
+}
+
+/* for warning/error messages: */
+.section h1.error {
+	color: #e00;
+	text-align: center;
+	margin-bottom: 10px;
+}
+
+/* 6 color schemes that will rotate through sections */
+.s1color {
+	background: <%= model.nonCSS.s1["background-color"] %>;
+<% if model.appearance.section1Override then %>
+	color: <%= model.nonCSS.section1Color.color %>;
+<% end %>
+}
+.s2color {
+	background: <%= model.nonCSS.s2["background-color"] %>;
+<% if model.appearance.section2Override then %>
+	color: <%= model.nonCSS.section2Color.color %>;
+<% end %>}
+.s3color {
+	background: <%= model.nonCSS.s3["background-color"] %>;
+<% if model.appearance.section3Override then %>
+	color: <%= model.nonCSS.section3Color.color %>;
+<% end %>
+}
+.s4color {
+	background: <%= model.nonCSS.s4["background-color"] %>;
+<% if model.appearance.section4Override then %>
+	color: <%= model.nonCSS.section4Color.color %>;
+<% end %>}
+.s5color {
+	background: <%= model.nonCSS.s5["background-color"] %>;
+<% if model.appearance.section5Override then %>
+	color: <%= model.nonCSS.section5Color.color %>;
+<% end %>}
+.s6color {
+	background: <%= model.nonCSS.s6["background-color"] %>;
+<% if model.appearance.section6Override then %>
+	color: <%= model.nonCSS.section6Color.color %>;
+<% end %>}
+
+/* menu bar that sticks to top after scrolling down */
+.controlbar {
+	font-family: <%=  model.appearance.controlbar["font-family"] %>;
+	border-bottom: <%= model.appearance.controlbarSeparatorEnabled and "1px solid " .. model.nonCSS.controlbarseparator.color or "none" %>;
+	background: <%= model.nonCSS.controlbar["background-color"] %>;
+	z-index: 15;
+	max-width: 1400px; /* same as .wrap; needed when position absolute */
+	position: -webkit-sticky;
+	position: -ms-sticky; /* tbd: used by Edge? if no remove also from detection */
+	position: sticky; /* sticky ignored if not supported; handled in js */
+	top: 0px;
+}
+.controlbar .inner {
+	padding: 0;
+	font-weight: 300;
+	margin: 0 auto;
+	/*text-align: justify; irrelevant with floats below */
+}
+a.controlbarBtn {
+	display: inline-block;
+	float: left;
+	padding: 15px 0px;
+	color: <%= model.nonCSS.controlbar.color %>;
+	width: <%= string.format("%0.3f", 100.0 / menuItems) %>%; /* 100/#elements */
+	text-align: <%= model.nonCSS.controlButtonAlignCenter and 'center' or 'left' %>;
+	text-decoration: none;
+	font-size: 20px;
+	vertical-align: middle;
+}
+a.controlbarBtn span {
+	padding: 0px 10px; /* needed to support safari in lightroom */
+	display: inline-block;
+}
+/* background for the whole button */
+a.controlbarBtn:hover,
+a.controlbarBtn:active,
+a.controlbarBtn:focus
+{
+	background: <%= model.nonCSS.controlbar["background-color-hover"] %>;
+}
+/* or: lines above/below text only */
+/*a.controlbarBtn span:hover,
+a.controlbarBtn span:active,
+a.controlbarBtn span:focus
+{
+	border-bottom: 1px solid;
+	border-top: 1px solid;
+	border-color: #313131;
+}*/
+
+div#footer {
+	border-top: <%= model.appearance.footerSeparatorEnabled and "1px solid " .. model.nonCSS.footerSeparator.color or "none" %>;
+	background: <%= model.nonCSS.footer["background-color"] %>;
+	color: <%= model.nonCSS.footer.color %>;
+	margin: 0px auto;
+	text-align: center;
+}
+
+/* show links for in-page hrefs upon hover */
+.section h1:hover a.anchor.link-intact,
+.section h2:hover a.anchor.link-intact,
+.section h3:hover a.anchor.link-intact,
+.section h4:hover a.anchor.link-intact {
+	/*display:inline-block;*/
+	visibility: visible;
+	opacity:0.6;
+	transition: opacity 300ms ease 200ms;
+}
+/*
+.section h1:hover a.anchor,
+.section h2:hover a.anchor,
+.section h3:hover a.anchor,
+.section h4:hover a.anchor {
+	outline: 0;
+}*/
+.section h1 .link-intact,
+.section h2 .link-intact,
+.section h3 .link-intact,
+.section h4 .link-intact {
+	display:inline-block;
+	visibility: hidden;
+	opacity: 0;
+	margin-left:-12px; /*must match width so 0 pixels gap*/
+/*    color:#000; */
+/*    text-decoration:none;
+	line-height:1;
+*/    transition: opacity 100ms ease 400ms;
+}
+/* image of a hyperlink */
+.link-intact {
+	width: 12px;
+	height: 12px;
+	background: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"%3e%3cpath d="M5.88.03c-.18.01-.36.03-.53.09-.27.1-.53.25-.75.47a.5.5 0 1 0 .69.69c.11-.11.24-.17.38-.22.35-.12.78-.07 1.06.22.39.39.39 1.04 0 1.44l-1.5 1.5c-.44.44-.8.48-1.06.47-.26-.01-.41-.13-.41-.13a.5.5 0 1 0-.5.88s.34.22.84.25c.5.03 1.2-.16 1.81-.78l1.5-1.5c.78-.78.78-2.04 0-2.81-.28-.28-.61-.45-.97-.53-.18-.04-.38-.04-.56-.03zm-2 2.31c-.5-.02-1.19.15-1.78.75l-1.5 1.5c-.78.78-.78 2.04 0 2.81.56.56 1.36.72 2.06.47.27-.1.53-.25.75-.47a.5.5 0 1 0-.69-.69c-.11.11-.24.17-.38.22-.35.12-.78.07-1.06-.22-.39-.39-.39-1.04 0-1.44l1.5-1.5c.4-.4.75-.45 1.03-.44.28.01.47.09.47.09a.5.5 0 1 0 .44-.88s-.34-.2-.84-.22z" /%3e%3c/svg%3e');
+}
+/*
+<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8">
+  <path d="M5.88.03c-.18.01-.36.03-.53.09-.27.1-.53.25-.75.47a.5.5 0 1 0 .69.69c.11-.11.24-.17.38-.22.35-.12.78-.07 1.06.22.39.39.39 1.04 0 1.44l-1.5 1.5c-.44.44-.8.48-1.06.47-.26-.01-.41-.13-.41-.13a.5.5 0 1 0-.5.88s.34.22.84.25c.5.03 1.2-.16 1.81-.78l1.5-1.5c.78-.78.78-2.04 0-2.81-.28-.28-.61-.45-.97-.53-.18-.04-.38-.04-.56-.03zm-2 2.31c-.5-.02-1.19.15-1.78.75l-1.5 1.5c-.78.78-.78 2.04 0 2.81.56.56 1.36.72 2.06.47.27-.1.53-.25.75-.47a.5.5 0 1 0-.69-.69c-.11.11-.24.17-.38.22-.35.12-.78.07-1.06-.22-.39-.39-.39-1.04 0-1.44l1.5-1.5c.4-.4.75-.45 1.03-.44.28.01.47.09.47.09a.5.5 0 1 0 .44-.88s-.34-.2-.84-.22z"
+  />
+</svg>
+*/
+
+.thumbcontainer .inner {
+	text-align: center;
+}
+
+/* from older gallery for thumbnails: */
+ul.thumbs {
+	margin: 0;
+	padding: 0;
+	text-align: left;
+	display: inline-block;
+}
+ul.thumbs li {
+	display: inline-block;
+	padding: 0;
+	margin: 5px 5px 10px 5px;
+	list-style: none;
+	width: 81px; /* this & next for noCenterCrop */
+	text-align: center;
+	cursor: pointer; /*zoom-in?*/
+}
+ul.thumbs li .thumbwrapper {
+	display: inline-block;
+	vertical-align: middle;
+	outline: none;
+	overflow: hidden;
+	padding: 2px;
+<% if model.nonCSS.thumbBorderShape == 'rounded' then %>
+	border-radius: 10px;
+<% elseif model.nonCSS.thumbBorderShape == 'circular' then %>
+	border-radius: 100%;
+<% end %>
+<% if model.nonCSS.invertNavColors then %>
+	background: #fff;
+	border: 1px solid #ccc;
+<% else %>
+	background: #000;
+	border: 1px solid #333;
+<% end %>
+}
+ul.thumbs li .thumbwrapper:hover,
+ul.thumbs li .thumbwrapper:focus,
+ul.thumbs li .thumbwrapper:active
+{
+<% if model.nonCSS.invertNavColors then %>
+	background: #000;
+	border: 1px solid #333;
+<% else %>
+	background: #fff;
+	border: 1px solid #ccc;
+<% end %>
+}
+ul.thumbs img {
+<%= mode ~= 'preview' and 'opacity: 0;' or '' %>
+	transition: opacity .35s ease-in;
+/*	border: none; */
+}
+
+/* center-cropped is used to create square thumbnails by cropping; lightroom doesn't support this */
+div.center-cropped {
+	position: relative;
+	width: 75px;
+	height: 75px;
+	overflow: hidden;
+<% if model.nonCSS.thumbBorderShape == 'rounded' then %>
+	border-radius: 10px;
+<% elseif model.nonCSS.thumbBorderShape == 'circular' then %>
+	border-radius: 100%;
+<% end %>
+}
+div.center-cropped img {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	height: 100%;
+	width: auto;
+	-webkit-transform: translate(-50%,-50%);
+		-ms-transform: translate(-50%,-50%);
+			transform: translate(-50%,-50%);
+}
+div.center-cropped img.portrait {
+	width: 100%;
+	height: auto;
+}
+<% if model.nonCSS.thumbBorderShape == 'sharp' then %>
+ul.thumbs li .thumbwrapper, div.center-cropped {
+	border-radius: unset;
+}
+<% elseif model.nonCSS.thumbBorderShape == 'circular' then %>
+ul.thumbs li .thumbwrapper, div.center-cropped {
+	border-radius: 100%;
+}
+<% end %>
+
+/* no-centercropping (cropping deselected) */
+.noCenterCrop div.thumb .thumbwrapper {
+	text-align: center;
+	margin: 0px auto;
+}
+.noCenterCrop div.center-cropped {
+	text-align: center;
+	width: auto;
+	height: auto;
+}
+.noCenterCrop div.center-cropped img {
+	position: static;
+	top: 0px;
+	left: 0px;
+	width: 75px;
+	height: auto;
+	max-width: 75px;
+	-webkit-transform: none;
+	    -ms-transform: none;
+	        transform: none;
+}
+.noCenterCrop div.center-cropped img.portrait {
+	max-width: none;
+	max-height: 75px;
+	height: 75px;
+	width: auto;
+}
+
+/* set play/pause button */
+@media (-webkit-min-device-pixel-ratio: 1.1), (-webkit-min-device-pixel-ratio: 1.09375), (min-resolution: 105dpi), (min-resolution: 1.1dppx) { /*serve if resolution high enough & browser supports */
+	.pswp--svg .pswp__button--playpause.play, .pswp--svg .pswp__button--playpause.play:before {
+		background-image: url('play-wh.svg');
+	}
+	.pswp--svg .pswp__button--playpause.pause, .pswp--svg .pswp__button--playpause.pause:before {
+		background-image: url('pause-wh.svg');
+	}
+}
+.pswp__button--playpause.play, .pswp__button--playpause.play:before {
+	background: url('play-wh.png') 12px 12px/20px 20px no-repeat;
+}
+.pswp__button--playpause.pause, .pswp__button--playpause.pause:before {
+	background: url('pause-wh.png') 12px 12px/20px 20px no-repeat;
+}
+.pswp__button {
+	outline: none;
+}
+
+/* wider caption, centered */
+.pswp__caption__center {
+	max-width: 550px;
+	text-align: center;
+}
+
+/* bigger left/right buttons, spanning top to bottom */
+.pswp__button--arrow--left,
+.pswp__button--arrow--right {
+	top: 44px;
+	margin-top: unset;
+	width: 75px;
+	height: 100%; /* overruns caption, but no biggie */
+}
+.pswp--has_mouse .pswp__button--arrow--left,
+.pswp--has_mouse .pswp__button--arrow--right {
+	background: rgba(0,0,0,.25); /* show background on whole clickable area */
+}
+.pswp__button--arrow--left:before,
+.pswp__button--arrow--right:before {
+	top: 40%; /* icon roughly centered */
+	background-color: unset;
+}
+.pswp__button--arrow--left:before {
+	left: 17px;
+}
+.pswp__button--arrow--right:before {
+	right: 17px;
+}
+
+/* transition slides with "swipe-style" movement on larger screens when mouse is detected */
+@media (min-width: 768px) {
+	.pswp__container.transit {
+		transition:.3s ease-in-out all;
+	}
+}
+
+
+/* popups (for downloads), see http://jsfiddle.net/zyrm2qop/6/ */
+#popupOverlay {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: rgba(0, 0, 0, 0.7);
+	transition: opacity 500ms;
+	visibility: hidden;
+	opacity: 0;
+	z-index: -999;
+}
+.popup {
+	margin: 140px auto 0px;
+	padding: 18px;
+	width: 20%;
+	min-width: 290px;
+	background: #fff;
+	text-align: center;
+	border: 2px solid gray;
+	border-radius: 5px;
+	position: relative;
+}
+.popup h3 {
+	margin: 5px auto 15px;
+	color: #333;
+}
+.popup .close {
+	position: absolute;
+	top: 3px;
+	right: 3px;
+	width: 1em;
+	height: 1em; /* for IE */
+	opacity: 0.75;
+	transition: all 200ms;
+	cursor: pointer;
+}
+.popup .close:hover, .popup .close:active, .popup .close:focus{
+	opacity: 1.0;
+	outline: 0;
+}
+.popup .close svg {
+	display: block;
+}
+.close-x {
+  stroke: black;
+  fill: transparent;
+  stroke-linecap: round;
+  stroke-width: 5;
+}
+.popup .popupContent {
+	margin: 0px auto;
+	width: 250px;
+	color: #555;
+}
+
+/* DL popup see http://jsfiddle.net/osjgppfw/3/ , styles from bootstrap*/
+.popup .popupContent ul {
+	list-style-type: none;
+	text-align: left;
+	padding-left: 1.5em;
+	font-size: 1em;
+}
+.popup .button {
+	padding: 10px;
+	color: #fff;
+	border: 2px solid #06D85F;
+	border-radius: 20px/50px;
+	text-decoration: none;
+	cursor: pointer;
+	transition: all 0.3s ease-out;
+	background: rgba(6, 216, 95, 0.7);
+	margin-top: 1em;
+}
+.popup .button:hover, .popup .button:active, .popup .button:focus {
+	background: rgba(6, 216, 95, 1);
+}
+.progress {
+	height: 20px;
+	margin-top: 25px;
+	margin-bottom: 20px;
+	overflow: hidden;
+	background-color: #f5f5f5;
+	border-radius: 4px;
+	-webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+			box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+}
+.progress-bar {
+	float: left;
+	width: 0;
+	height: 100%;
+	font-size: 12px;
+	line-height: 20px;
+	color: #fff;
+	text-align: center;
+	background-color: #428bca;
+	-webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
+			box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
+	-webkit-transition: width .6s ease;
+			transition: width .6s ease;
+}
+.progress-bar-success {
+	background-color: #5cb85c;
+}
+
+.popup label {
+	display: inline-block;
+	margin-bottom: 5px;
+	font-weight: 700;
+}
+.alert-success {
+	background-color: #dff0d8;
+	color: #3c763d;
+	background-image: -webkit-linear-gradient(top,#dff0d8 0,#c8e5bc 100%);
+	background-image: linear-gradient(to bottom,#dff0d8 0,#c8e5bc 100%);
+	background-repeat: repeat-x;
+	border-color: #b2dba1;
+}
+.alert-danger {
+	background-image: -webkit-linear-gradient(top, #f2dede 0%, #e7c3c3 100%);
+	background-image:         linear-gradient(to bottom, #f2dede 0%, #e7c3c3 100%);
+	background-repeat: repeat-x;
+	border-color: #dca7a7;
+	background-color: #f2dede;
+	color: #a94442;
+}
+.alert {
+	padding: .5em;
+	margin-bottom: 10px;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	text-shadow: 0 1px 0 rgba(255,255,255,.2);
+	-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 2px rgba(0,0,0,.05);
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 2px rgba(0,0,0,.05);
+}
+.popup .popupContent .alert {
+	font-size: smaller;
+	line-height: 1.5;
+	max-height: 6em;
+	overflow: hidden;
+}
+
+a.pswp__share--facebook:hover:before {
+	border-bottom-color: #FFF;
+}
+a.pswp__share--googleplus:hover {
+	background: #dd4b39;
+	color: #FFF;
+}
+a.pswp__share--downloadall:hover {
+	background: #DDD;
+}
+a.pswp__share--map:hover {
+	background: #DDD;
+}
+a.pswp__share--email:hover {
+	background: #ffbb4d;
+}
+a.pswp__share--pinterest:hover {
+	background: #bd081c;
+	color: #fff;
+}

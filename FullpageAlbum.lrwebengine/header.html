@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns#">
+<% --[[
+The Fullpage Lightroom Web Gallery
+
+Copyright (c) 2016-2026 Justin Briggs
+
+Licensed under the MIT License:
+   http://www.opensource.org/licenses/mit-license.php
+ ]]
+%>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" charset="UTF-8"/>
+
+<meta name="viewport"  content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" /> <!-- for mobile devices -->
+<meta name="generator" content="Fullpage Web Gallery plugin v<%= model.metadata.fullpageVersion.value %> for Adobe Photoshop Lightroom" />
+<meta name="keywords" content="<%= model.metadata.keywords %>" />
+
+<% if model.nonCSS.noIndexing then %>
+<meta name="robots" content="noindex,nofollow" />
+<% else %>
+<meta name="robots" content="index,follow" />
+<% end %>
+
+<title><%= stripTags(model.metadata.siteTitle.value) %></title>
+<link rel="canonical" href="$canonicalUrl" />
+<!-- opengraph used by facebook et al -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="<%= stripTags(model.metadata.siteTitle.value) %>" />
+<meta property="og:description" name="description" content="<%= (model.metadata.collectionTitle.value or '')=='' and stripTags(model.metadata.collectionDescription.value) or stripTags(model.metadata.collectionTitle.value) %>" />
+<meta property="og:url" content="$canonicalUrl" />
+<meta property="og:image" content="<%= addSlash(model.metadata.canonicalUrlBase) .. featuredImage %>" />
+<!-- twitter 'card' support -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="<%= stripTags(model.metadata.siteTitle.value) %>"/>
+<meta name="twitter:url" content="$canonicalUrl"/>
+<meta name="twitter:image" content="<%= addSlash(model.metadata.canonicalUrlBase) .. featuredImage %>" />
+
+<% if mode == 'preview' then %>
+	<% --[[ Scripting support for rollovers and (when previewed in Lightroom) live Update, photobin syncing ]] %>
+	<script type="text/javascript">
+		window.AgMode = "$mode";
+		window.AgOnLoad = function() {
+			tellLightroomWhatImagesWeAreUsing();
+			setActiveImageSize( "thumb" );
+			<% if image then %>
+			callCallback( "showInPhotoBin", "$image.imageID" );
+			<% end %>
+		}
+	</script>
+	<!-- Use jquery 1 for Safari in Lightroom -->
+	<script type="text/javascript" src="$theRoot/js/jquery-1.12.4.min.js"></script>
+	<script type="text/javascript" src="$theRoot/js/live_update.js"></script>
+<% else %>
+	<!-- can't use jQuery 3 slim because we use .animate() -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+	<script>window.jQuery || document.write('<script src="$theRoot/js/jquery-3.7.1.min.js">\x3C/script>')</script>
+
+	<script type="text/javascript">
+		var clickTarget = function() {};
+		var positionStickySupport = function() {var el=document.createElement('a'),mStyle=el.style;mStyle.cssText="position:sticky;position:-webkit-sticky;position:-ms-sticky;";return mStyle.position.indexOf('sticky')!==-1;}();
+	</script>
+
+<% end %>
+
+<% if model.nonCSS.markupHeadInjection ~= '' then %>
+	<!-- custom markup begins -->
+	<%= model.nonCSS.markupHeadInjection %>
+	<!-- custom markup ends -->
+<% end %>
+
+<!-- Combined Core photoswipe CSS file and Skin CSS file (styling of UI - buttons, caption, etc.) -->
+<link rel="stylesheet" href="$theRoot/pswp/photoswipeandskin.css" />
+
+<!-- Defaults for this page -->
+<link href="$theRoot/css/fullpage.css" rel="stylesheet" type="text/css" />
+
+<style> /* for settings that require lua / image filenames */
+.banner {
+	background: $bannerImage;
+}
+</style>
+</head>

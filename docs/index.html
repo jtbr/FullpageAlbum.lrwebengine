@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fullpage — a modern, customizable HTML5 web gallery for Adobe Lightroom</title>
+<meta name="description" content="Fullpage is a free, open-source Adobe Lightroom Classic web gallery: a responsive, customizable single-page scrolling photo album with a full-screen PhotoSwipe viewer.">
+<style>
+  :root{
+    --accent:#0977bc;
+    --accent-dark:#075a8d;
+    --ink:#222;
+    --muted:#5b6670;
+    --bg:#ffffff;
+    --soft:#f4f7fa;
+    --border:#e2e8ee;
+    --maxw:860px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;color:var(--ink);background:var(--bg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65;font-size:18px;
+  }
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  header.hero{
+    background:linear-gradient(160deg,var(--accent),var(--accent-dark));
+    color:#fff;padding:64px 0 56px;text-align:center;
+  }
+  header.hero h1{margin:0 0 .15em;font-size:2.6rem;font-weight:700;letter-spacing:-.5px}
+  header.hero .tag{font-size:1.25rem;opacity:.95;margin:0 auto;max-width:640px}
+  header.hero .badges{margin-top:22px;font-size:.95rem;opacity:.9}
+  header.hero .badges span{display:inline-block;margin:0 8px;white-space:nowrap}
+  .cta{display:inline-block;margin:28px 6px 0;background:#fff;color:var(--accent-dark);
+    font-weight:600;padding:13px 26px;border-radius:6px;font-size:1.05rem}
+  .cta:hover{text-decoration:none;background:#eef6fc}
+  .cta.secondary{background:transparent;color:#fff;box-shadow:inset 0 0 0 2px rgba(255,255,255,.7)}
+  .cta.secondary:hover{background:rgba(255,255,255,.12)}
+  .shot{display:block;max-width:100%;height:auto;margin:36px auto 0;border-radius:8px;
+    box-shadow:0 10px 40px rgba(0,0,0,.18)}
+  figure.fig{margin:30px 0 6px;text-align:center}
+  figure.fig img{max-width:100%;height:auto;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.16)}
+  figure.fig figcaption{font-size:.9rem;color:var(--muted);margin-top:10px}
+  main section{padding:44px 0;border-bottom:1px solid var(--border)}
+  main section:last-of-type{border-bottom:none}
+  h2{font-size:1.7rem;margin:.2em 0 .6em;letter-spacing:-.3px}
+  h3{font-size:1.15rem;margin:1.4em 0 .3em}
+  p{margin:0 0 1em}
+  .lead{font-size:1.15rem;color:var(--muted)}
+  ul.features{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}
+  ul.features li{position:relative;padding-left:26px}
+  ul.features li::before{content:"›";position:absolute;left:4px;top:-2px;color:var(--accent);font-size:1.4rem;font-weight:700}
+  ul.features li b{display:block}
+  .callout{background:var(--soft);border:1px solid var(--border);border-left:4px solid var(--accent);
+    border-radius:6px;padding:20px 24px;margin:8px 0}
+  table.compare{width:100%;border-collapse:collapse;margin-top:8px;font-size:.97rem}
+  table.compare th,table.compare td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+  table.compare th{background:var(--soft);font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  table.compare td:first-child{font-weight:600;width:20%}
+  ol.steps{padding-left:1.2em}
+  ol.steps li{margin-bottom:.5em}
+  footer{padding:34px 0 48px;color:var(--muted);font-size:.92rem;text-align:center}
+  .credits{font-size:.9rem;color:var(--muted)}
+  @media (max-width:620px){
+    header.hero h1{font-size:2rem}
+    body{font-size:17px}
+    ul.features{grid-template-columns:1fr}
+    .wrap{padding:0 16px}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Fullpage</h1>
+    <p class="tag">A free, modern HTML5 web gallery for Adobe Lightroom Classic — a responsive, customizable single-page photo album</p>
+    <div class="badges">
+      <span>✓ Single-page scroll</span>
+      <span>✓ Full-screen PhotoSwipe viewer</span>
+      <span>✓ Pure static files</span>
+      <span>✓ MIT-licensed</span>
+    </div>
+    <a class="cta" href="https://github.com/jtbr/FullpageAlbum.lrwebengine/releases/latest/download/FullpageAlbum.lrwebengine.zip">Download Fullpage →</a>
+    <a class="cta secondary" href="https://github.com/jtbr/FullpageAlbum.lrwebengine">View on GitHub</a>
+    <img class="shot" src="fullpage-screenshot.png" alt="The single-page scrolling layout of a Fullpage gallery in a web browser">
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="what">
+    <h2>What it is</h2>
+    <p class="lead">Fullpage is a web-gallery plug-in for Adobe Lightroom Classic's Web module. From the photos and metadata you already manage in Lightroom, it generates a complete, standards-based website: a single, continuously scrolling page of images that lazy-load as you go, where any image opens in a full-screen <a href="https://photoswipe.com/">PhotoSwipe</a> viewer with pinch-zoom, swipe, keyboard navigation and an optional slideshow.</p>
+    <figure class="fig">
+      <img src="fullpage-viewer.png" alt="The full-screen PhotoSwipe image viewer open in a Fullpage gallery">
+      <figcaption>Click any image to open the full-screen viewer — with zoom, swipe, keyboard control and an optional slideshow.</figcaption>
+    </figure>
+    <p>The output is plain HTML5, CSS3 and JavaScript with no server-side code, so it can be hosted anywhere — including very cheaply on a static host such as Amazon S3.</p>
+    <p>Fullpage is the sibling of <a href="https://trialstravails.blogspot.com/2015/07/gallerific.html">Gallerific</a>, an earlier and also-free Lightroom gallery by the same author. If you prefer a classic paginated grid with a thumbnail strip, use Gallerific; if you want an immersive single-page scroll, use Fullpage.</p>
+  </section>
+
+  <section id="how">
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li>In Lightroom's <b>Library</b>, select the images you want and make sure they carry the titles, captions and metadata you'd like to include.</li>
+      <li>Switch to the <b>Web</b> module and choose <b>Fullpage HTML5 Gallery</b> as the layout. A live preview renders inside Lightroom.</li>
+      <li>Set your titles, colours, image sizes, captions, logo and other options in the panel — or just accept the sensible defaults.</li>
+      <li><b>Export to disk</b> or <b>Upload</b>, and Fullpage writes a complete, ready-to-publish website (the <code>index.html</code> page plus its <code>im/</code> and <code>res/</code> folders).</li>
+    </ol>
+    <p>From there it's just files. Open <code>index.html</code> locally, copy it to a web server, or deploy it with the included S3 helper script.</p>
+  </section>
+
+  <section id="customize">
+    <h2>Built to be customized — outside Lightroom</h2>
+    <p>Lightroom is wonderful for managing and editing photos, but its Web module boxes you into the options its panel happens to expose. That was a frustration behind Gallerific, and a founding idea behind Fullpage.</p>
+    <div class="callout">
+      <p style="margin:0"><b>Fullpage's philosophy:</b> provide near total flexibility in configuration, including injection of html or even javascript in several places</p>
+    </div>
+    <p>Because there are no proprietary formats and no server-side code, the whole workflow is web-native: edit the stylesheet, inject your own markup or analytics, drop in web font links. The plug-in even ships an example <code>deploy_to_s3</code> script that gzip-compresses text, recompresses images with mozjpeg, and syncs everything to Amazon S3 with sensible cache headers.</p>
+    <p>The flip side is that Fullpage is a somewhat more advanced gallery: by design it leaves more of the HTML and styling details in your hands than a typical turnkey gallery does. A basic album still needs no coding at all, but users have the option of customizing most everything. If you'd rather drive everything from within Lightroom's panel and never think about HTML, <a href="https://trialstravails.blogspot.com/2015/07/gallerific.html">Gallerific</a> may be a better fit.</p>
+  </section>
+
+  <section id="features">
+    <h2>Features &amp; strengths</h2>
+    <ul class="features">
+      <li><b>Single-page, responsive layout</b>Images flow down one page and adapt to any screen, from phones to wide desktops.</li>
+      <li><b>Full-screen PhotoSwipe viewer</b>Tap or click any image for an immersive viewer with zoom, swipe, keyboard control and a slideshow.</li>
+      <li><b>Wide &amp; panorama photos</b>Very wide and panoramic images are handled gracefully — pan and zoom across them at full resolution in the viewer.</li>
+      <li><b>Fast by design</b>Images lazy-load as you scroll, and the output is tuned for gzip compression and static hosting.</li>
+      <li><b>Standards-based</b>HTML5/CSS3/JavaScript with no server-side scripting — works across modern browsers and devices.</li>
+      <li><b>Highly customizable</b>Titles, captions, colours, fonts, logo/identity plate, image sizes, watermarks, and arbitrary head markup.</li>
+      <li><b>Optional extras</b>Download-all-images, map links for geotagged photos, and per-image captions and metadata.</li>
+      <li><b>Cheap to host</b>Pure static files; serve them from S3 or any web server. Includes an S3 deployment helper.</li>
+      <li><b>Free &amp; open source</b>Released under the MIT License. Lightroom Classic on Windows or macOS.</li>
+    </ul>
+  </section>
+
+  <section id="vs-gallerific">
+    <h2>Fullpage vs. <a href="https://trialstravails.blogspot.com/2015/07/gallerific.html">Gallerific</a></h2>
+    <p>Both are free Lightroom web galleries by the same author and share a lot of underlying tooling. They differ mainly in layout and in how you customize them.</p>
+    <table class="compare">
+      <thead><tr><th></th><th>Fullpage</th><th>Gallerific</th></tr></thead>
+      <tbody>
+        <tr><td>Layout</td><td>One continuously scrolling page</td><td>Paginated grid with a thumbnail strip</td></tr>
+        <tr><td>Image viewer</td><td>Full-screen PhotoSwipe (zoom &amp; swipe)</td><td>In-page slide with thumbnail navigation</td></tr>
+        <tr><td>Customization</td><td>Web-native: hack the standard HTML/CSS/JS with your own tools</td><td>Primarily through the Lightroom panel</td></tr>
+        <tr><td>Best for</td><td>Immersive, modern single-page browsing</td><td>Classic, structured multi-page albums</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="get">
+    <h2>Get started</h2>
+    <p><a href="https://github.com/jtbr/FullpageAlbum.lrwebengine/releases/latest/download/FullpageAlbum.lrwebengine.zip">Download the latest release</a> (or browse the <a href="https://github.com/jtbr/FullpageAlbum.lrwebengine">source on GitHub</a>), unzip the <code>FullpageAlbum.lrwebengine</code> folder into Lightroom's <code>Web Galleries</code> presets folder, and restart Lightroom. Full install and usage instructions are in the included <code>README.html</code>, and Adobe has a <a href="https://helpx.adobe.com/lightroom/help/creating-web-galleries-basic-workflow.html">general guide to web galleries</a>.</p>
+    <p>No templates to install — the gallery works out of the box, and you can save your own presets from within Lightroom once you've dialed in a look you like.</p>
+    <div class="callout">
+      <p style="margin:0"><b>A note on compatibility:</b> Fullpage was last tested on <b>Lightroom Classic CC 7.1</b> — development paused when Lightroom moved to a subscription-only model and the author stopped updating it. The galleries it produces are just standard web pages, so they're unaffected by your Lightroom version, and the plug-in should still work in current Lightroom Classic. If you run it on a newer release, we'd genuinely welcome a note on how it works — please <a href="https://github.com/jtbr/FullpageAlbum.lrwebengine/issues">let us know on GitHub</a>.</p>
+    </div>
+  </section>
+
+  <section id="credits">
+    <h2>License &amp; thanks</h2>
+    <p>Fullpage is open source under the <a href="https://opensource.org/licenses/mit-license.php">MIT License</a>.</p>
+    <p class="credits">It stands on the shoulders of excellent open-source work, including <a href="https://photoswipe.com/">PhotoSwipe</a>, <a href="https://jquery.com/">jQuery</a>, <a href="https://github.com/luis-almeida/unveil">unveil.js</a>, <a href="https://stuk.github.io/jszip/">JSZip</a> and <a href="https://github.com/dolox/fallback/">fallback.js</a> — and on everything learned building <a href="https://trialstravails.blogspot.com/2015/07/gallerific.html">Gallerific</a> before it.</p>
+    <p>Found a bug, built something nice with it, or have a suggestion? Issues and contributions are welcome on <a href="https://github.com/jtbr/FullpageAlbum.lrwebengine">GitHub</a>.</p>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    Fullpage — a Lightroom web gallery by Justin Briggs · <a href="https://github.com/jtbr/FullpageAlbum.lrwebengine">GitHub</a> · <a href="https://trialstravails.blogspot.com">trials &amp; travails</a>
+  </div>
+</footer>
+
+</body>
+</html>
