@@ -6,3 +6,6 @@ Thumbs.db
 
 # Built release artifacts (attach to a GitHub Release instead of committing)
 *.zip
+
+# Generated from readme.md by build-release.sh (pandoc)
+README.html
