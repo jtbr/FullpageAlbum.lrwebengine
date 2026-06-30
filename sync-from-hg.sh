@@ -51,4 +51,5 @@ echo
 echo "Done. Synced from hg rev $HGID."
 echo "Next: review 'git status', then e.g.:"
 echo "  git add -A && git commit -m \"Sync from hg rev $HGID\""
-echo "  ./build-release.sh   # then attach FullpageAlbum.lrwebengine.zip to a GitHub Release"
+echo "  ./build-release.sh   # then attach Fullpage-LightroomWebGallery.zip to a GitHub Release"
+echo "  push to github, make a release using a new version number tag"

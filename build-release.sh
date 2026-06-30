@@ -21,7 +21,7 @@ pandoc readme.md -f gfm -t html5 --template readme-template.html \
   -o README.html
 
 # 2. Package the release: plug-in folder + README.html + license.txt.
-OUT="FullpageAlbum.lrwebengine.zip"
+OUT="Fullpage-LightroomWebGallery.zip"
 rm -f "$OUT"
 zip -r "$OUT" FullpageAlbum.lrwebengine README.html license.txt \
   -x '*/.DS_Store' '*/Thumbs.db'
