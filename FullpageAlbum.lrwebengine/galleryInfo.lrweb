@@ -28,14 +28,14 @@ return {
     aboutBoxFile = "about.html",
 
 	model = {
-		["metadata.fullpageVersion.value"] = 0.7, -- change collectionDescription as well.
+		["metadata.fullpageVersion.value"] = "0.7.2", -- on bump, also update the version in collectionDescription (the default below AND its TranslatedStrings entry).
 
 		-- [[ Define default values for variables (overriden by templates and user) ]]
 
 		["nonCSS.bannerEnabled"] = true,
 		["metadata.siteTitle.value"] = LOC "$$$/AgWPG/Templates/HTML/DefaultValues/properties/SiteTitle=Site Title",
 		["metadata.collectionTitle.value"] = LOC "$$$/AgWPG/Templates/HTML/DefaultValues/properties/CollectionTitle=My Photographs",
-		["metadata.collectionDescription.value"] = LOC "$$$/AgWPG/Templates/HTML/DefaultValues/properties/CollectionDescription=Photo Gallery created by Fullpage Plugin v0.7 for Adobe Lightroom",
+		["metadata.collectionDescription.value"] = LOC "$$$/AgWPG/Templates/HTML/DefaultValues/properties/CollectionDescription=Photo Gallery created by Fullpage Plugin v0.7.2 for Adobe Lightroom",
 		["appearance.uppercaseHeaders"] = true,
 		["nonCSS.bannerBorderCSS"] = "1px solid white",
 		["nonCSS.bannerImage"] = "url('res/css/bg.jpg')", -- may be index, or url, or other valid background
@@ -417,7 +417,7 @@ return {
 						wraps = false,
 					},
 					f:labeled_text_input  {
-						title = LOC "$$$/AgWPG/Templates/HTMLPanel/Menu1link=Menu item 1 Web or Mail Link",
+						title = LOC "$$$/AgWPG/Templates/HTML/Panel/Menu1link=Menu item 1 Web or Mail Link",
 						value = bind "nonCSS.menu1.url",
 						enabled = bind "nonCSS.menuEnabled",
 						wraps = false,

@@ -1,5 +1,5 @@
 
-# Fullpage HTML5 Lightroom Web Album
+# Fullpage HTML5 Lightroom Web Gallery
 
 Thanks for downloading the Fullpage Web Album Plugin for Adobe Lightroom! Hope you enjoy it.
 
