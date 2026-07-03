@@ -52,4 +52,4 @@ The gallery works out of the box with sensible defaults — no presets are requi
 * All the strings that are used in the generated web album (e.g. *Next Photo*, *Play Slideshow*, ...) are customizable. They are found in the `TranslatedStrings.txt` file in the `strings/en` subdirectory. The relevant strings are below the line `--[[Custom strings]]`.
 
 
-##### For more information and updates, please visit [the Fullpage home page](https://jtbr.github.io/FullpageAlbum.lrwebengine).
+#### For more information and updates, please visit [the Fullpage home page](https://jtbr.github.io/FullpageAlbum.lrwebengine).
