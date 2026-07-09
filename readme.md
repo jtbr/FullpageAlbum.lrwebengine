@@ -1,6 +1,8 @@
 
 # Fullpage HTML5 Lightroom Web Gallery
 
+> *This readme is about usage. For more general info, see [the website](https://jtbr.github.io/FullpageAlbum.lrwebengine/)*
+
 Thanks for downloading the Fullpage Web Album Plugin for Adobe Lightroom! Hope you enjoy it.
 
 Fullpage is a responsive, single-page scrolling web photo gallery. Images are laid out down
